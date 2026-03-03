@@ -1,7 +1,7 @@
 *** Settings ***
 Library    QWeb
 Library                 QWeb
-Suite Setup             Open Browser    about:blank    chrome    --no-first-run
+Suite Setup             Open Browser    about:blank    chrome    --guest
 Suite Teardown          Close All Browsers
 
 *** Test Cases ***
@@ -33,4 +33,24 @@ Login To Copado Robotic Testing With Okta MFA
     # 6. Wait for manual MFA approval and verify we reached the Home Page
     VerifyText     Welcome back      timeout=60s
     VerifyText     Project Overview
-    ClickText      Use Chromium without an account    timeout=60s
+    # 7. Open the Project Dropdown
+    # We click the name of the currently active project to open the menu
+    ClickElement   xpath=//app-switcher[@id='project-select']//button
+    
+    # 8. Select the target project
+    ClickText      CopadoAI_Testing_Project_Anmol
+    
+    # 9. Navigate to Test Runs in the left sidebar
+    ClickText      Test Runs
+
+    # 10. Click on the Run ID
+    # Note: We are using the exact ID from your screenshot for now.
+    ClickText      4272472
+
+    # 11. Click on Configuration
+    ClickText      Configuration
+    
+    # 12. Disable Video Streaming and Recording
+    # The anchor ensures we click the 'Disabled' button associated with Video Streaming
+    ClickText      Enabled    anchor=Video Streaming and Recording
+
