@@ -8,7 +8,7 @@ Suite Teardown          Close All Browsers
 Login To Copado Robotic Testing With Okta MFA
     [Documentation]    Automates the login flow, opens video stream, and verifies stream is working
 
-    # 1-14: Login steps (keeping as-is)
+    # Steps 1-14: Login and navigation (keeping as-is)
     GoTo   https://robotic.copado.com/u/login
     VerifyText     Log in to Copado
     ClickText      Continue with Google
@@ -37,42 +37,61 @@ Login To Copado Robotic Testing With Okta MFA
     ClickText      Run Now
 
     # ========================================
-    # FIXED VIDEO STREAM VERIFICATION
+    # FIXED VIDEO STREAM VERIFICATION (QWeb Only)
     # ========================================
     
-    # 15. Switch to video stream window
-    SwitchWindow    NEW
+    # 15. Give new tab time to open
+    Log            ⏱️ Waiting for video stream tab to open...
+    Sleep          3s
     
-    # 16. Wait for stream to initialize (not "Please wait")
-    Log    Waiting for video stream to initialize...
-    VerifyNoText    Please wait while the video stream is being created    timeout=180s
+    # 16. Switch to the NEW window (video stream tab)
+    Log            🔄 Switching to video stream window...
+    SwitchWindow   NEW
     
-    # 17. Give stream extra time to fully load and start rendering
-    Log    Allowing video stream to stabilize and start playing...
-    Sleep           20s
+    # 17. Verify we're on the video stream page by checking URL
+    Log            🔍 Verifying we're on the video stream page...
+    ${current_url}=    GetUrl
+    Log            Current URL: ${current_url}
     
-    # 18. Capture first frame
-    Log    Capturing first frame...
-    ${frame_1}=     LogScreenshot
+    # 18. Wait for stream initialization (no "Please wait" message)
+    Log            ⏳ Waiting for video stream to initialize...
+    VerifyNoText   Please wait while the video stream is being created    timeout=180s
     
-    # 19. Let stream play
-    Log    Waiting 5 seconds for stream to play...
-    Sleep           5s
+    # 19. CRITICAL: Click on the video area to ensure window has focus
+    Log            🖱️ Clicking on video area to ensure window focus...
+    ClickElement   xpath=//body    # Click somewhere on the page to activate window
+    Sleep          2s
     
-    # 20. Capture second frame
-    Log    Capturing second frame...
-    ${frame_2}=     LogScreenshot
+    # 20. Give stream time to stabilize and start playing
+    Log            ⏱️ Allowing video stream to stabilize (20 seconds)...
+    Sleep          20s
     
-    # 21. Compare frames - they should be DIFFERENT if stream is playing
-    Log    Comparing frames to verify stream is playing...
+    # 21. Capture first frame
+    Log            📸 Capturing FIRST frame from video stream...
+    ${frame_1}=    LogScreenshot
+    Log            First frame saved: ${frame_1}
+    
+    # 22. Wait for stream to play
+    Log            ⏱️ Waiting 5 seconds for stream to play...
+    Sleep          5s
+    
+    # 23. Capture second frame
+    Log            📸 Capturing SECOND frame from video stream...
+    ${frame_2}=    LogScreenshot
+    Log            Second frame saved: ${frame_2}
+    
+    # 24. Compare frames - they should be DIFFERENT if stream is playing
+    Log            🔍 Comparing frames to detect video movement...
     ${comparison_result}=    Run Keyword And Return Status    QImage.Compare Images    ${frame_1}    ${frame_2}
     
-    # 22. If images are identical (comparison passed), stream is frozen - FAIL
-    Run Keyword If    ${comparison_result}    Fail    ❌ Video stream is FROZEN - both screenshots are identical!
+    # 25. If images are identical, stream is frozen - FAIL
+    Run Keyword If    ${comparison_result}    Fail    ❌ FROZEN STREAM: Screenshots are IDENTICAL - video is not playing!
     
-    # 23. If we reach here, images are different - stream is working!
-    Log    ✅ SUCCESS: Video stream verified - frames are different, stream is playing!
+    # 26. Success - images are different!
+    Log            ✅ SUCCESS: Screenshots are DIFFERENT - video stream is playing!
     
-    # 24. Close stream window and return to main window
+    # 27. Cleanup - close video stream window
+    Log            🧹 Closing video stream window...
     CloseWindow
-    SwitchWindow    1
+    SwitchWindow   1
+    Log            ✅ Test completed successfully!
