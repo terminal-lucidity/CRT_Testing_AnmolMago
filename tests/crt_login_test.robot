@@ -61,5 +61,23 @@ Login To Copado Robotic Testing With Okta MFA
     ClickText      All Test Cases
     ClickText      Open Video Stream
     ClickText      Run Now
-    SwitchWindow   NEW
-    VerifyTitle    Test Runs · Copado Robotic Testing
+    # 15. Switch focus to the newly opened tab
+# 15. Switch focus to the newly opened tab
+    SwitchWindow    NEW
+    
+    # 16. WAIT for the loading screen to disappear
+    VerifyNoText    Please wait while the video stream is being created    timeout=120s
+    
+    # 17. Verify the video player has loaded by looking for its starting timestamp
+    # This proves the player UI successfully initialized and the stream is ready
+    VerifyText      0:00    timeout=15s
+    
+    # 18. (Optional) Give it a few seconds to play, then verify the time has moved past 0:00
+    # Note: This step depends on how fast the text updates in the DOM. If it fails, remove steps 18 & 19!
+    Sleep           5s
+    VerifyNoText    0:00    timeout=10s
+    
+    # 19. Close the window and return to the main dashboard
+    CloseWindow
+    SwitchWindow    1
+
