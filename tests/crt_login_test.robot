@@ -6,84 +6,73 @@ Suite Teardown          Close All Browsers
 
 *** Test Cases ***
 Login To Copado Robotic Testing With Okta MFA
-    [Documentation]    Automates the login flow using secure Project Settings variables and waits for manual Push MFA.
+    [Documentation]    Automates the login flow, opens video stream, and verifies stream is working
 
-    # 1. Navigate to the Copado login page
+    # 1-14: Login steps (keeping as-is)
     GoTo   https://robotic.copado.com/u/login
     VerifyText     Log in to Copado
-
-    # 2. Select Google SSO
     ClickText      Continue with Google
-
-    # 3. Google Sign-in Screen
     VerifyText     Sign in
     TypeText       Email or phone    ${C_EMAIL}
     ClickText      Next
-
-    # 4. Okta Credentials Screen (Reusing the ${EMAIL} variable)
     VerifyText     Connecting to
     TypeText       Username          ${C_EMAIL}
     TypeSecret     Password          ${C_PASSWORD}
     ClickText      Sign In
-
-    # 5. Okta Verify (Push) Screen
     VerifyText     Okta Verify
     ClickText      Send Push         sleep=60s
-
-    # 6. Wait for manual MFA approval and verify we reached the Home Page
     VerifyText     Welcome back      timeout=60s
     VerifyText     Project Overview
-    # 7. Open the Project Dropdown
     ClickElement   xpath=//app-switcher[@id='project-select']//button
-    
-    # 8. Select the target project
     ClickText      CopadoAI_Testing_Project_Anmol
-    
-    # 9. Navigate to Test Runs in the left sidebar
     ClickText      Test Runs
-
-    # 10. Click on the Run ID
-    # Note: We are using the exact ID from your screenshot for now.
     ClickText      4272472
-
-    # 11. Click on Configuration
     ClickText      Configuration
-    
-    # 12. Disable Video Streaming and Recording
-    # The anchor ensures we click the 'Disabled' button associated with Video Streaming
     ClickText      Enabled    anchor=Video Streaming and Recording
     ClickText      Save
-    # 13. Close the Configuration off-canvas popup using its exact ID
     ClickElement   xpath=//button[@id='offcanvas-close-btn']
-    
-    # 14. Click Rerun to execute the test job again
     ClickText      Re-Run
     ClickText      All Test Cases
     ClickText      Open Video Stream
     ClickText      Run Now
-# 15. Switch focus to the newly opened tab
+
+    # ========================================
+    # FIXED VIDEO STREAM VERIFICATION
+    # ========================================
+    
+    # 15. Switch to video stream window
     SwitchWindow    NEW
     
-    # 16. WAIT for the Copado backend to finish building the stream
-    VerifyNoText    Please wait while the video stream is being created    timeout=120s
+    # 16. Wait for stream to initialize (not "Please wait")
+    Log    Waiting for video stream to initialize...
+    VerifyNoText    Please wait while the video stream is being created    timeout=180s
     
-    # 17. Give the canvas 5 seconds to stabilize and start rendering the feed
-    Sleep           10s
+    # 17. Give stream extra time to fully load and start rendering
+    Log    Allowing video stream to stabilize and start playing...
+    Sleep           20s
     
-    # 18. Take Snapshot #1: QWeb's LogScreenshot takes a picture and saves the file path to our variable
+    # 18. Capture first frame
+    Log    Capturing first frame...
     ${frame_1}=     LogScreenshot
-    SwitchWindow    1
-    # 19. Let the stream play for 3 seconds
-    Sleep           3s
     
-    # 20. Take Snapshot #2
+    # 19. Let stream play
+    Log    Waiting 5 seconds for stream to play...
+    Sleep           5s
+    
+    # 20. Capture second frame
+    Log    Capturing second frame...
     ${frame_2}=     LogScreenshot
     
-    # 21. Prove the video is playing by visually comparing the screenshots!
-    # If the video is frozen, CompareImages passes (which fails our test).
-    # If the video is playing, CompareImages throws an error (which passes our test!).
-    Run Keyword And Expect Error    *    QImage.Compare Images    ${frame_1}    ${frame_2}
-
-    # 22. Close the window and return to the main dashboard
+    # 21. Compare frames - they should be DIFFERENT if stream is playing
+    Log    Comparing frames to verify stream is playing...
+    ${comparison_result}=    Run Keyword And Return Status    QImage.Compare Images    ${frame_1}    ${frame_2}
+    
+    # 22. If images are identical (comparison passed), stream is frozen - FAIL
+    Run Keyword If    ${comparison_result}    Fail    ❌ Video stream is FROZEN - both screenshots are identical!
+    
+    # 23. If we reach here, images are different - stream is working!
+    Log    ✅ SUCCESS: Video stream verified - frames are different, stream is playing!
+    
+    # 24. Close stream window and return to main window
     CloseWindow
     SwitchWindow    1
