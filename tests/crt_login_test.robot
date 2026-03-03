@@ -34,7 +34,6 @@ Login To Copado Robotic Testing With Okta MFA
     VerifyText     Welcome back      timeout=60s
     VerifyText     Project Overview
     # 7. Open the Project Dropdown
-    # We click the name of the currently active project to open the menu
     ClickElement   xpath=//app-switcher[@id='project-select']//button
     
     # 8. Select the target project
@@ -53,4 +52,17 @@ Login To Copado Robotic Testing With Okta MFA
     # 12. Disable Video Streaming and Recording
     # The anchor ensures we click the 'Disabled' button associated with Video Streaming
     ClickText      Enabled    anchor=Video Streaming and Recording
+    ClickText      Save
+    # 13. Close the Configuration off-canvas popup using its exact ID
+    ClickElement   xpath=//button[@id='offcanvas-close-btn']
+    
+    # 14. Click Rerun to execute the test job again
+    ClickText      Re-Run
+    ClickText      All Test Cases
+    ClickText      Open Video Stream
+    ClickText      Run Now
+    
+    VerifyText     Video Stream
+    
+    
 
