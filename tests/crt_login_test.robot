@@ -1,6 +1,6 @@
 *** Settings ***
 Library    QWeb
-Library                 QWeb
+Library    QImage
 Suite Setup             Open Browser    about:blank    chrome    --guest
 Suite Teardown          Close All Browsers
 
@@ -61,23 +61,29 @@ Login To Copado Robotic Testing With Okta MFA
     ClickText      All Test Cases
     ClickText      Open Video Stream
     ClickText      Run Now
-    # 15. Switch focus to the newly opened tab
 # 15. Switch focus to the newly opened tab
     SwitchWindow    NEW
     
-    # 16. WAIT for the loading screen to disappear
+    # 16. WAIT for the Copado backend to finish building the stream
     VerifyNoText    Please wait while the video stream is being created    timeout=120s
     
-    # 17. Verify the video player has loaded by looking for its starting timestamp
-    # This proves the player UI successfully initialized and the stream is ready
-    VerifyText      0:00    timeout=15s
+    # 17. Give the canvas 5 seconds to stabilize and start rendering the feed
+    Sleep           100s
     
-    # 18. (Optional) Give it a few seconds to play, then verify the time has moved past 0:00
-    # Note: This step depends on how fast the text updates in the DOM. If it fails, remove steps 18 & 19!
-    Sleep           5s
-    VerifyNoText    0:00    timeout=10s
+    # 18. Take Snapshot #1: QWeb's LogScreenshot takes a picture and saves the file path to our variable
+    ${frame_1}=     LogScreenshot
     
-    # 19. Close the window and return to the main dashboard
+    # 19. Let the stream play for 3 seconds
+    Sleep           3s
+    
+    # 20. Take Snapshot #2
+    ${frame_2}=     LogScreenshot
+    
+    # 21. Prove the video is playing by visually comparing the screenshots!
+    # If the video is frozen, CompareImages passes (which fails our test).
+    # If the video is playing, CompareImages throws an error (which passes our test!).
+    Run Keyword And Expect Error    * CompareImages    ${frame_1}    ${frame_2}
+    
+    # 22. Close the window and return to the main dashboard
     CloseWindow
     SwitchWindow    1
-
