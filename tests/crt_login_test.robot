@@ -72,8 +72,8 @@ Login To Copado Robotic Testing With Okta MFA
     Log            First frame saved: ${frame_1}
     
     # 22. Wait for stream to play
-    Log            ⏱️ Waiting 5 seconds for stream to play...
-    Sleep          5s
+    Log            ⏱️ Waiting 30 seconds for stream to play...
+    Sleep          30s
     
     # 23. Capture second frame
     Log            📸 Capturing SECOND frame from video stream...
