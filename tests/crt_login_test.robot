@@ -1,12 +1,15 @@
 *** Settings ***
 Library    QWeb
+Library                 QWeb
+Suite Setup             Open Browser    about:blank    chrome    --no-first-run
+Suite Teardown          Close All Browsers
 
 *** Test Cases ***
 Login To Copado Robotic Testing With Okta MFA
     [Documentation]    Automates the login flow using secure Project Settings variables and waits for manual Push MFA.
 
     # 1. Navigate to the Copado login page
-    OpenBrowser    https://robotic.copado.com/u/login    chrome
+    GoTo   https://robotic.copado.com/u/login
     VerifyText     Log in to Copado
 
     # 2. Select Google SSO
@@ -25,8 +28,9 @@ Login To Copado Robotic Testing With Okta MFA
 
     # 5. Okta Verify (Push) Screen
     VerifyText     Okta Verify
-    ClickText      Send Push
-
+    ClickText      Send Push         sleep=60s
+    ClickText      Continue          timeout=30s
     # 6. Wait for manual MFA approval and verify we reached the Home Page
     VerifyText     Welcome back      timeout=60s
     VerifyText     Project Overview
+    ClickText      Use Chromium without an account    timeout=60s
