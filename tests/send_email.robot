@@ -1,13 +1,13 @@
 *** Settings ***
 Library                 QWeb
-Library                 String           # Required to generate a unique string for the subject
+Library                 String
 Suite Setup             Open Browser    about:blank    chrome    --guest
 Suite Teardown          Close All Browsers
 
 *** Test Cases ***
 Send Email Verify Inbox And Open URLs
-    [Documentation]    Automates login, sends an email to self with URLs, verifies receipt, and opens the URLs.
-
+    [Documentation]    Automates login, sends an email to self with URLs, verifies receipt, opens the URLs, and checks that they loaded.
+    [Tags]             testgen
     # 1. Navigate to Gmail login and handle Okta MFA
     GoTo           https://mail.google.com
     VerifyText     Sign in
@@ -26,13 +26,11 @@ Send Email Verify Inbox And Open URLs
     # 2. Setup Variables for this specific test
     ${RANDOM_STR}=  Generate Random String    6    [LETTERS]
     ${SUBJECT}=     Set Variable    Automated URL Test ${RANDOM_STR}
-    ${URL_1}=       Set Variable    https://docs.copado.com
-    ${URL_2}=       Set Variable    https://robotframework.org
 
     # 3. Hit Compose and Send the Email to Yourself
     ClickText      Compose
     VerifyText     New Message       timeout=10s
-    TypeText       To                ${C_EMAIL}               # Sending to self so it lands in the current inbox
+    TypeText       To                ${C_EMAIL}
     PressKey       To                {ENTER}
     TypeText       Subject           ${SUBJECT}
     TypeText       Message Body      Hello! Please check these links:\n\n1. ${URL_1}\n2. ${URL_2}
@@ -40,13 +38,19 @@ Send Email Verify Inbox And Open URLs
     VerifyText     Message sent      timeout=15s
 
     # 4. Verify the email arrives in the inbox and open it
-    ClickText      Inbox             # Clicks the Inbox tab to refresh/ensure we are viewing the incoming mail
-    ClickText      ${SUBJECT}        timeout=30s              # Waits up to 30s for the email to arrive, then opens it
-    VerifyText     Hello! Please check these links            # Verifies part of the body text is present
+    ClickText      Inbox             
+    ClickText      ${SUBJECT}        timeout=30s              
+    VerifyText     Hello! Please check these links            
 
-    # 5. Open all URLs present in the email
-    ClickText      ${URL_1}          # Opens the first link (opens in a new tab)
-    SwitchWindow   1                 # Switches the bot's focus back to the first tab (Gmail)
+    ClickText      ${URL_1}          
+    SwitchWindow   2                 
+    VerifyUrl      ${URL_1}     timeout=10s    
+    CloseWindow                      
+    SwitchWindow   1                 
     
-    ClickText      ${URL_2}          # Opens the second link (opens in a new tab)
-    SwitchWindow   1                 # Switches focus back to Gmail again
+
+    ClickText      ${URL_2}          
+    SwitchWindow   2                 
+    VerifyUrl      ${URL_2}        timeout=10s    
+    CloseWindow                      
+    SwitchWindow   1                
