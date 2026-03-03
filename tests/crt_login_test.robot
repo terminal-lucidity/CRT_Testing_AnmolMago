@@ -29,7 +29,7 @@ Login To Copado Robotic Testing With Okta MFA
     # 5. Okta Verify (Push) Screen
     VerifyText     Okta Verify
     ClickText      Send Push         sleep=60s
-    ClickText      Continue          timeout=30s
+
     # 6. Wait for manual MFA approval and verify we reached the Home Page
     VerifyText     Welcome back      timeout=60s
     VerifyText     Project Overview
@@ -61,8 +61,5 @@ Login To Copado Robotic Testing With Okta MFA
     ClickText      All Test Cases
     ClickText      Open Video Stream
     ClickText      Run Now
-    
-    VerifyText     Video Stream
-    
-    
-
+    SwitchWindow   NEW
+    VerifyTitle    Test Runs · Copado Robotic Testing
