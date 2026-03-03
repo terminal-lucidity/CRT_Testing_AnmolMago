@@ -68,11 +68,11 @@ Login To Copado Robotic Testing With Okta MFA
     VerifyNoText    Please wait while the video stream is being created    timeout=120s
     
     # 17. Give the canvas 5 seconds to stabilize and start rendering the feed
-    Sleep           100s
+    Sleep           10s
     
     # 18. Take Snapshot #1: QWeb's LogScreenshot takes a picture and saves the file path to our variable
     ${frame_1}=     LogScreenshot
-    
+    SwitchWindow    1
     # 19. Let the stream play for 3 seconds
     Sleep           3s
     
@@ -82,8 +82,8 @@ Login To Copado Robotic Testing With Okta MFA
     # 21. Prove the video is playing by visually comparing the screenshots!
     # If the video is frozen, CompareImages passes (which fails our test).
     # If the video is playing, CompareImages throws an error (which passes our test!).
-    Run Keyword And Expect Error    * CompareImages    ${frame_1}    ${frame_2}
-    
+    Run Keyword And Expect Error    *    QImage.Compare Images    ${frame_1}    ${frame_2}
+
     # 22. Close the window and return to the main dashboard
     CloseWindow
     SwitchWindow    1
