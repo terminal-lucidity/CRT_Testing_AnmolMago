@@ -6,7 +6,7 @@ Suite Setup             Open Browser    about:blank    chrome    --guest
 Suite Teardown          Close All Browsers
 
 *** Test Cases ***
-Login To Copado Robotic Testing With Okta MFA
+Login To Copado Robotic Testing + E2E Test Flow
     [Documentation]    Automates the login flow, opens video stream, and verifies stream is working
 
     # Steps 1-14: Login and navigation (keeping as-is)
