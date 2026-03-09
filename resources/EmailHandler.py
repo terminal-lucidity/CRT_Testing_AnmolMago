@@ -15,12 +15,10 @@ class EmailHandler:
         password = BuiltIn().get_variable_value("${GMAIL_APP_PASSWORD}")
         if not password:
             raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set!")
-
-        password = str(password).encode('ascii', 'ignore').decode('ascii').strip()
-        sender = str(sender).encode('ascii', 'ignore').decode('ascii').strip()
-        recipient = str(recipient).encode('ascii', 'ignore').decode('ascii').strip()
-        subject = str(subject).encode('ascii', 'ignore').decode('ascii').strip()
-        
+        password = str(password).replace('\xa0', ' ').strip()
+        sender = str(sender).replace('\xa0', ' ').strip()
+        recipient = str(recipient).replace('\xa0', ' ').strip()
+        subject = str(subject).replace('\xa0', ' ').strip()
         body = str(body).replace('\xa0', ' ').strip()
 
         msg = MIMEMultipart()
@@ -44,9 +42,9 @@ class EmailHandler:
         if not password:
             raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set!")
             
-        password = str(password).encode('ascii', 'ignore').decode('ascii').strip()
-        email_address = str(email_address).encode('ascii', 'ignore').decode('ascii').strip()
-        subject = str(subject).encode('ascii', 'ignore').decode('ascii').strip()
+        password = str(password).replace('\xa0', ' ').strip()
+        email_address = str(email_address).replace('\xa0', ' ').strip()
+        subject = str(subject).replace('\xa0', ' ').strip()
         partial_body = str(partial_body).replace('\xa0', ' ').strip()
 
         try:
@@ -79,9 +77,9 @@ class EmailHandler:
                         if msg.is_multipart():
                             for part in msg.walk():
                                 if part.get_content_type() == "text/html":
-                                    body_content = part.get_payload(decode=True).decode()
+                                    body_content = part.get_payload(decode=True).decode('utf-8', errors='ignore')
                         else:
-                            body_content = msg.get_payload(decode=True).decode()
+                            body_content = msg.get_payload(decode=True).decode('utf-8', errors='ignore')
 
                         if partial_body not in body_content:
                             raise Exception(f"Subject matched, but partial body '{partial_body}' was not found.")
@@ -91,11 +89,6 @@ class EmailHandler:
                         
                         mail.quit()
                         return urls 
-
-            except Exception as e:
-                print(f"Error checking email: {str(e)}")
-                
-        raise Exception(f"Could not find the email with subject '{subject}' after {retries} attempts.")
 
             except Exception as e:
                 print(f"Error checking email: {str(e)}")
