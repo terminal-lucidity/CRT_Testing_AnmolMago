@@ -1,4 +1,3 @@
 #!/bin/bash
 # Install BeautifulSoup to help easily parse HTML emails for URLs
-pip install beautifulsoup4 lxml 
-
+pip install beautifulsoup4 lxml
