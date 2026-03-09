@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.header import decode_header
 import time
 from robot.libraries.BuiltIn import BuiltIn  
-from robot.api import logger   # ADDED: Robot Framework's official logger
+from robot.api import logger   
 
 class EmailHandler:
     
@@ -111,12 +111,11 @@ class EmailHandler:
 
                                 logger.info("DEBUG: => BODY MATCHED! Extracting URLs...")
                                 
-                                # FIX: Use regex to find all URLs inside href="..." tags
                                 urls = re.findall(r'href=["\'](https?://[^"\']+)["\']', body_content)
                                 
                                 logger.info(f"DEBUG: Extracted URLs: {urls}")
                                 
-                                mail.quit()
+                                mail.logout()
                                 return urls 
                 
                 if not found_match:
