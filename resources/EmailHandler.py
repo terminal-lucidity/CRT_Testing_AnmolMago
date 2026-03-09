@@ -41,10 +41,14 @@ class EmailHandler:
 
     def verify_email_and_extract_urls(self, email_address, subject, partial_body, retries=5, delay=10):
         password = BuiltIn().get_variable_value("${GMAIL_APP_PASSWORD}")
-        
         if not password:
-            raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set in Copado UI!")
+            raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set!")
             
+        password = str(password).encode('ascii', 'ignore').decode('ascii').strip()
+        email_address = str(email_address).encode('ascii', 'ignore').decode('ascii').strip()
+        subject = str(subject).encode('ascii', 'ignore').decode('ascii').strip()
+        partial_body = str(partial_body).replace('\xa0', ' ').strip()
+
         try:
             from bs4 import BeautifulSoup
         except ImportError:
@@ -55,7 +59,7 @@ class EmailHandler:
                 mail = imaplib.IMAP4_SSL('imap.gmail.com')
                 mail.login(email_address, password)
                 mail.select('inbox')
-
+                
                 status, messages = mail.search(None, f'(SUBJECT "{subject}")')
                 mail_ids = messages[0].split()
 
@@ -87,6 +91,11 @@ class EmailHandler:
                         
                         mail.quit()
                         return urls 
+
+            except Exception as e:
+                print(f"Error checking email: {str(e)}")
+                
+        raise Exception(f"Could not find the email with subject '{subject}' after {retries} attempts.")
 
             except Exception as e:
                 print(f"Error checking email: {str(e)}")
