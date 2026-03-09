@@ -41,6 +41,8 @@ class EmailHandler:
             raise Exception(f"Failed to send email: {str(e)}")
 
     def verify_email_and_extract_urls(self, email_address, subject, partial_body, retries=5, delay=10):
+        import re  # ADDED: Python's built-in regex library (no installation needed!)
+        
         password = BuiltIn().get_variable_value("${GMAIL_APP_PASSWORD}")
         if not password:
             raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set!")
@@ -52,11 +54,6 @@ class EmailHandler:
 
         logger.info(f"DEBUG: Searching for Target Subject: '{subject}'")
         logger.info(f"DEBUG: Searching for Target Body Snippet: '{partial_body}'")
-
-        try:
-            from bs4 import BeautifulSoup
-        except ImportError:
-            raise Exception("CRITICAL ERROR: beautifulsoup4 is not installed. Pace.before did not run successfully.")
 
         for attempt in range(retries):
             logger.info(f"DEBUG: --- Starting IMAP Check Attempt {attempt + 1}/{retries} ---")
@@ -113,8 +110,10 @@ class EmailHandler:
                                     continue 
 
                                 logger.info("DEBUG: => BODY MATCHED! Extracting URLs...")
-                                soup = BeautifulSoup(body_content, 'lxml')
-                                urls = [a['href'] for a in soup.find_all('a', href=True)]
+                                
+                                # FIX: Use regex to find all URLs inside href="..." tags
+                                urls = re.findall(r'href=["\'](https?://[^"\']+)["\']', body_content)
+                                
                                 logger.info(f"DEBUG: Extracted URLs: {urls}")
                                 
                                 mail.quit()
