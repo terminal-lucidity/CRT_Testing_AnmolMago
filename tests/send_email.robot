@@ -10,7 +10,7 @@ Suite Teardown  Close All Browsers
 ${SENDER_EMAIL}         amago.testmail@gmail.com
 ${RECIPIENT_EMAIL}      amago.testmail@gmail.com
 
-${EMAIL_BODY}           Hello! Please check out this link: <a href="https://docs.copado.com">Copado Docs</a> and <a href="https://www.google.com/">Google</a>.
+${EMAIL_BODY}           Hello! Please check out this link: <a href="https://docs.copado.com/home/en-us/">Copado Docs</a> and <a href="https://www.google.com/">Google</a>.
 ${PARTIAL_VERIFY}       Please check out this link
 
 *** Test Cases ***
