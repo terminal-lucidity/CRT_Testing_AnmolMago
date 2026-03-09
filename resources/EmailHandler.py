@@ -1,21 +1,21 @@
-import os
 import smtplib
 import imaplib
 import email
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
+from robot.libraries.BuiltIn import BuiltIn  
 
 class EmailHandler:
     
     def __init__(self):
-        # We removed the environment variable check from here so it doesn't crash on import
         pass
 
     def send_gmail(self, sender, recipient, subject, body):
-        password = os.environ.get('GMAIL_APP_PASSWORD')
+        password = BuiltIn().get_variable_value("${GMAIL_APP_PASSWORD}")
+        
         if not password:
-            raise Exception("CRITICAL ERROR: GMAIL_APP_PASSWORD environment variable is not set!")
+            raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set in Copado UI!")
 
         msg = MIMEMultipart()
         msg['From'] = sender
@@ -34,12 +34,11 @@ class EmailHandler:
             raise Exception(f"Failed to send email: {str(e)}")
 
     def verify_email_and_extract_urls(self, email_address, subject, partial_body, retries=5, delay=10):
-        password = os.environ.get('GMAIL_APP_PASSWORD')
+        password = BuiltIn().get_variable_value("${GMAIL_APP_PASSWORD}")
+        
         if not password:
-            raise Exception("CRITICAL ERROR: GMAIL_APP_PASSWORD environment variable is not set!")
+            raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set in Copado UI!")
             
-        # We moved this import inside the function. 
-        # If Pace.before failed to install it, the test will fail here with a clear error.
         try:
             from bs4 import BeautifulSoup
         except ImportError:
