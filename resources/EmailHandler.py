@@ -17,11 +17,17 @@ class EmailHandler:
         if not password:
             raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set in Copado UI!")
 
+        sender = str(sender).replace('\xa0', ' ').strip()
+        recipient = str(recipient).replace('\xa0', ' ').strip()
+        subject = str(subject).replace('\xa0', ' ')
+        body = str(body).replace('\xa0', ' ')
+
         msg = MIMEMultipart()
         msg['From'] = sender
         msg['To'] = recipient
         msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'html'))
+
+        msg.attach(MIMEText(body, 'html', 'utf-8'))
 
         try:
             server = smtplib.SMTP('smtp.gmail.com', 587)
