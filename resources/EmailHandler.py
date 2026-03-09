@@ -57,38 +57,47 @@ class EmailHandler:
                 mail = imaplib.IMAP4_SSL('imap.gmail.com')
                 mail.login(email_address, password)
                 mail.select('inbox')
-                
-                status, messages = mail.search(None, f'(SUBJECT "{subject}")')
+                status, messages = mail.search(None, 'ALL')
                 mail_ids = messages[0].split()
 
                 if not mail_ids:
-                    print(f"Email not found. Retrying in {delay} seconds... (Attempt {attempt + 1}/{retries})")
+                    print(f"Inbox is empty. Retrying in {delay} seconds... (Attempt {attempt + 1}/{retries})")
                     time.sleep(delay)
                     continue
 
-                latest_email_id = mail_ids[-1]
-                status, msg_data = mail.fetch(latest_email_id, '(RFC822)')
+                found_match = False
+                for i in range(1, min(6, len(mail_ids) + 1)):
+                    latest_email_id = mail_ids[-i]
+                    status, msg_data = mail.fetch(latest_email_id, '(RFC822)')
+                    
+                    for response_part in msg_data:
+                        if isinstance(response_part, tuple):
+                            msg = email.message_from_bytes(response_part[1])
+                            
+                            msg_subject = str(msg['Subject']).replace('\n', '').replace('\r', '').strip()
+                            if subject in msg_subject:
+                                found_match = True
+                                body_content = ""
+                                if msg.is_multipart():
+                                    for part in msg.walk():
+                                        if part.get_content_type() == "text/html":
+                                            body_content = part.get_payload(decode=True).decode('utf-8', errors='ignore')
+                                else:
+                                    body_content = msg.get_payload(decode=True).decode('utf-8', errors='ignore')
+
+                                if partial_body not in body_content:
+                                    print(f"Found subject, but partial body missing. Checking next email...")
+                                    continue # Might be an old test, keep looking
+
+                                soup = BeautifulSoup(body_content, 'lxml')
+                                urls = [a['href'] for a in soup.find_all('a', href=True)]
+                                
+                                mail.quit()
+                                return urls 
                 
-                for response_part in msg_data:
-                    if isinstance(response_part, tuple):
-                        msg = email.message_from_bytes(response_part[1])
-                        
-                        body_content = ""
-                        if msg.is_multipart():
-                            for part in msg.walk():
-                                if part.get_content_type() == "text/html":
-                                    body_content = part.get_payload(decode=True).decode('utf-8', errors='ignore')
-                        else:
-                            body_content = msg.get_payload(decode=True).decode('utf-8', errors='ignore')
-
-                        if partial_body not in body_content:
-                            raise Exception(f"Subject matched, but partial body '{partial_body}' was not found.")
-
-                        soup = BeautifulSoup(body_content, 'lxml')
-                        urls = [a['href'] for a in soup.find_all('a', href=True)]
-                        
-                        mail.quit()
-                        return urls 
+                if not found_match:
+                    print(f"Email not found in recent messages. Retrying... (Attempt {attempt + 1}/{retries})")
+                    time.sleep(delay)
 
             except Exception as e:
                 print(f"Error checking email: {str(e)}")
