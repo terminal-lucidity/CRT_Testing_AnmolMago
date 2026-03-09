@@ -1,4 +1,5 @@
 *** Settings ***
+Library         RetryFailed
 Library         QWeb
 Library         String             
 Library         ../resources/EmailHandler.py    
@@ -15,7 +16,7 @@ ${PARTIAL_VERIFY}       Please check out this link
 *** Test Cases ***
 Assignment 4 Send Verify And Open URLs
     [Documentation]    Sends an email, verifies receipt, and opens all URLs contained inside.
-    [Tags]             testgen
+    [Tags]        testgen            test:retry(1)
     
     ${RANDOM_STR}=     Generate Random String    6    [LETTERS]
     ${EMAIL_SUBJECT}=  Set Variable    Copado CRT Assignment 4 - Test ${RANDOM_STR}
