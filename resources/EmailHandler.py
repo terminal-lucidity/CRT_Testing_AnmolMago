@@ -13,20 +13,20 @@ class EmailHandler:
 
     def send_gmail(self, sender, recipient, subject, body):
         password = BuiltIn().get_variable_value("${GMAIL_APP_PASSWORD}")
-        
         if not password:
-            raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set in Copado UI!")
+            raise Exception("CRITICAL ERROR: ${GMAIL_APP_PASSWORD} variable is not set!")
 
-        sender = str(sender).replace('\xa0', ' ').strip()
-        recipient = str(recipient).replace('\xa0', ' ').strip()
-        subject = str(subject).replace('\xa0', ' ')
-        body = str(body).replace('\xa0', ' ')
+        password = str(password).encode('ascii', 'ignore').decode('ascii').strip()
+        sender = str(sender).encode('ascii', 'ignore').decode('ascii').strip()
+        recipient = str(recipient).encode('ascii', 'ignore').decode('ascii').strip()
+        subject = str(subject).encode('ascii', 'ignore').decode('ascii').strip()
+        
+        body = str(body).replace('\xa0', ' ').strip()
 
         msg = MIMEMultipart()
         msg['From'] = sender
         msg['To'] = recipient
         msg['Subject'] = subject
-
         msg.attach(MIMEText(body, 'html', 'utf-8'))
 
         try:
