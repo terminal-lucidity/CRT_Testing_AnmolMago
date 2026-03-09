@@ -6,8 +6,8 @@ Suite Setup     Open Browser    about:blank    chrome    --guest
 Suite Teardown  Close All Browsers
 
 *** Variables ***
-${SENDER_EMAIL}         your.email@gmail.com
-${RECIPIENT_EMAIL}      your.email@gmail.com
+${SENDER_EMAIL}         amago.testmail@gmail.com
+${RECIPIENT_EMAIL}      amago.testmail@gmail.com
 
 ${EMAIL_BODY}           Hello! Please check out this link: <a href="https://docs.copado.com">Copado Docs</a> and <a href="https://www.google.com/">Google</a>.
 ${PARTIAL_VERIFY}       Please check out this link
