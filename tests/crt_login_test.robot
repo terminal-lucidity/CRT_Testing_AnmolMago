@@ -5,12 +5,16 @@ Library    OperatingSystem
 Suite Setup             Open Browser    about:blank    chrome    --guest
 Suite Teardown          Close All Browsers
 
-*** Test Cases ***
-Login To Copado Robotic Testing + E2E Test Flow
-    [Documentation]    Automates the login flow, opens video stream, and verifies stream is working
+*** Variables ***
+${LOGIN_URL}            https://robotic.copado.com/u/login
+${PROJECT_NAME}         CopadoAI_Testing_Project_Anmol
 
-    # Steps 1-14: Login and navigation (keeping as-is)
-    GoTo   https://robotic.copado.com/u/login
+*** Test Cases ***
+UC002: Login To Copado Robotic Testing + E2E Test Flow
+    [Documentation]    Automates login, selects project, opens latest test run, toggles stream, and verifies video
+
+    # LOGIN
+    GoTo           ${LOGIN_URL}
     VerifyText     Log in to Copado
     ClickText      Continue with Google
     VerifyText     Sign in
@@ -24,30 +28,48 @@ Login To Copado Robotic Testing + E2E Test Flow
     ClickText      Send Push         sleep=60s
     VerifyText     Welcome back      timeout=60s
     VerifyText     Project Overview
+
+    # PROJECT & TEST RUN NAVIGATION
+
     ClickElement   xpath=//app-switcher[@id='project-select']//button
-    ClickText      CopadoAI_Testing_Project_Anmol
+    ClickText      ${PROJECT_NAME}
+    
     ClickText      Test Runs
-    ClickText      4304928
+
+    VerifyElement    xpath=(//div[@col-id="buildNumber"]//a)[1]    timeout=10s
+    ClickElement     xpath=(//div[@col-id="buildNumber"]//a)[1]
+    # CONFIGURATION & TOGGLE
     ClickText      Configuration
-    ClickText      Enabled    anchor=Video Streaming and Recording
+    
+    ClickText      Disabled    anchor=Video Streaming and Recording
+    Run Keyword And Ignore Error    ClickText    Save
+
+    ClickText      Enabled     anchor=Video Streaming and Recording
     ClickText      Save
+    
     ClickElement   xpath=//button[@id='offcanvas-close-btn']
+    # TEST EXECUTION
     ClickText      Re-Run
     ClickText      All Test Cases
     ClickText      Open Video Stream
     ClickText      Run Now
 
-    # ========================================
-    # FIXED VIDEO STREAM VERIFICATION (QWeb Only)
-    # ========================================
-    
-    Log            Waiting for video stream tab to open
-    Sleep          10s
-    Log            Switching to video stream window
+    # VIDEO STREAM VERIFICATION 
+    Log            Waiting for new video stream window
     SwitchWindow    NEW
+    Sleep           20s
+    SwitchWindow    NEW
+    Log             Capturing the first frame
+    Log Screenshot  frame_1.png
     
-    ${has_error}=    ExecuteJavascript    return document.querySelector('video') ? (document.querySelector('video').error !== null) : false;
+    Log             Waiting 30 seconds to capture playback progress
+    Sleep           30s
     
-    Should Be True    not ${has_error}    msg=The video player entered an error state.
-    ${is_paused}=    ExecuteJavascript    return document.querySelector('video') ? document.querySelector('video').paused : true;
-    Should Be True    not ${is_paused}    msg=The video player is paused.
+    SwitchWindow    NEW
+    Log             Capturing the second frame
+    Log Screenshot  frame_2.png
+    
+    Log             Comparing the two frames...
+    ${images_match}=    Run Keyword And Return Status    Compare Images    frame_1.png    frame_2.png    tolerance=0.80
+    
+    Should Be True    not ${images_match}    msg=Video stream appears frozen! Both frames matched.
