@@ -16,13 +16,15 @@ class EmailHandler:
     def _get_access_token(self):
         from robot.libraries.BuiltIn import BuiltIn
         
-        client_id = BuiltIn().get_variable_value("${GMAIL_CLIENT_ID}")
-        client_secret = BuiltIn().get_variable_value("${GMAIL_CLIENT_SECRET}")
-        refresh_token = BuiltIn().get_variable_value("${GMAIL_REFRESH_TOKEN}")
+        # 1. Read and strictly clean the variables (removes hidden spaces and quotes)
+        client_id = str(BuiltIn().get_variable_value("${GMAIL_CLIENT_ID}")).strip(' "')
+        client_secret = str(BuiltIn().get_variable_value("${GMAIL_CLIENT_SECRET}")).strip(' "')
+        refresh_token = str(BuiltIn().get_variable_value("${GMAIL_REFRESH_TOKEN}")).strip(' "')
         
-        if not all([client_id, client_secret, refresh_token]):
-            raise Exception("CRITICAL ERROR: Missing one or more OAuth variables in Copado UI (GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN)!")
-
+        if not all([client_id, client_secret, refresh_token]) or client_id == "None":
+            raise Exception("CRITICAL ERROR: Missing one or more OAuth variables in Copado UI!")
+            
+        # 2. Silently negotiate a fresh access token from Google
         data = urllib.parse.urlencode({
             'client_id': client_id,
             'client_secret': client_secret,
@@ -37,8 +39,10 @@ class EmailHandler:
             with urllib.request.urlopen(req) as response:
                 resp_data = json.loads(response.read().decode())
                 return resp_data['access_token']
-        except Exception as e:
-            raise Exception(f"Failed to refresh OAuth token: {str(e)}")
+        except urllib.error.HTTPError as e:
+            # This will print the exact reason Google rejected it if it fails again
+            error_body = e.read().decode()
+            raise Exception(f"Failed to refresh OAuth token: {e.code} - {error_body}")
 
     def _make_api_call(self, url, token, method='GET', payload=None):
         headers = {
