@@ -13,7 +13,7 @@ ${EMAIL_BODY}           Hello! Please check out this link: <a href="https://docs
 ${PARTIAL_VERIFY}       Please check out this link
 
 *** Test Cases ***
-Assignment 4 Send Verify And Open URLs
+UC004: Send Verify And Open URLs
     [Documentation]    Sends an email, verifies receipt, and opens all URLs contained inside.
     [Tags]        testgen
     
