@@ -16,7 +16,7 @@ class EmailHandler:
     def _get_access_token(self):
         from robot.libraries.BuiltIn import BuiltIn
         
-        # 1. Read and strictly clean the variables (removes hidden spaces and quotes)
+        # clean the variables (removes hidden spaces and quotes)
         client_id = str(BuiltIn().get_variable_value("${GMAIL_CLIENT_ID}")).strip(' "')
         client_secret = str(BuiltIn().get_variable_value("${GMAIL_CLIENT_SECRET}")).strip(' "')
         refresh_token = str(BuiltIn().get_variable_value("${GMAIL_REFRESH_TOKEN}")).strip(' "')
@@ -24,7 +24,7 @@ class EmailHandler:
         if not all([client_id, client_secret, refresh_token]) or client_id == "None":
             raise Exception("CRITICAL ERROR: Missing one or more OAuth variables in Copado UI!")
             
-        # 2. Silently negotiate a fresh access token from Google
+        # generate fresh access token from Google
         data = urllib.parse.urlencode({
             'client_id': client_id,
             'client_secret': client_secret,
@@ -40,7 +40,7 @@ class EmailHandler:
                 resp_data = json.loads(response.read().decode())
                 return resp_data['access_token']
         except urllib.error.HTTPError as e:
-            # This will print the exact reason Google rejected it if it fails again
+            # logging the errors
             error_body = e.read().decode()
             raise Exception(f"Failed to refresh OAuth token: {e.code} - {error_body}")
 
@@ -123,8 +123,7 @@ class EmailHandler:
 
                     if not body_data:
                         continue
-
-                    # Fix base64 padding and decode
+                        
                     pad = len(body_data) % 4
                     if pad:
                         body_data += '=' * (4 - pad)
