@@ -1,6 +1,5 @@
 *** Settings ***
 Documentation           New test suite
-# You can change imported library to "QWeb" if testing generic web application, not Salesforce.
 Library    QWeb
 Library    QImage
 Library    OperatingSystem
@@ -11,7 +10,7 @@ Suite Teardown          Close All Browsers
 ${FABRIC_TEXTAREA}        xpath=//textarea[@data-fabric='textarea']
 
 *** Test Cases ***
-Verify E2E Flow
+UC003: Verify E2E Flow
     GoTo   https://robotic.copado.com/u/login
     VerifyText     Log in to Copado
     ClickText      Continue with Google
@@ -47,8 +46,3 @@ Verify E2E Flow
     ClickText       Export
     
     ClickElement    xpath=//cds-icon[@shape='SystemAndDevicesDotsThreeRegularVertical']
-    
-    
-    # ClickText       Delete Exploration
-    # TypeText    Text   delete
-    # ClickText          Delete
